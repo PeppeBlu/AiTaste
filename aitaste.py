@@ -2,7 +2,7 @@ import openai
 import gradio as gr
 
 # Configura OpenRouter con la tua API key
-openai.api_key = "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"  # La tua API key
+
 openai.api_base = "https://openrouter.ai/api/v1"
 
 # Lista di ingredienti comuni
