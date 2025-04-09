@@ -68,7 +68,7 @@ The app will launch locally, and a shareable public link will be available via G
     - Key affinities between ingredients
     - Suggested cooking technique
     - A creative dish composition based on food chemistry
-4.	Or simply chat freely in the chatbox on the left.
+Or simply chat freely in the chatbox on the left.
 
 ⸻
 
