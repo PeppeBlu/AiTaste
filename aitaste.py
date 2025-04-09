@@ -79,34 +79,42 @@ def chat(prompt_setting, user_input):
             stop=None,
         )
 
-        if response is None:
-            print("No response received.")
+        content = response.choices[0].message.content.strip()
+    
+        #  controlla se nella risposta è presente la stringa "<think>" e rimuove quella parte
+        # Se "<think>" è presente, rimuovi il contenuto tra "<think>" e "</think>"
+        if "<think>" in content:
+            start_index = content.index("<think>")
+            end_index = content.index("</think>") + len("</think>")
+            contentR = content[:start_index] + content[end_index:]
+        
+        return contentR.strip()
+
     except Exception as e:
         print("Error:", str(e))
 
-    content = response.choices[0].message.content.strip()
-    
-    #  controlla se nella risposta è presente la stringa "<think>" e rimuove quella parte
-    # Se "<think>" è presente, rimuovi il contenuto tra "<think>" e "</think>"
-    if "<think>" in content:
-        start_index = content.index("<think>")
-        end_index = content.index("</think>") + len("</think>")
-        contentR = content[:start_index] + content[end_index:]
-    
-    return contentR.strip()
-
 # Funzione per inviare gli ingredienti selezionati al chatbot
 def invia_ingredienti(history):
+    # Combina gli ingredienti selezionati in una stringa
     input_text = ", ".join(ingredienti_selezionati)
-    return chat(input_text, history)
+    
+    # Ottieni la risposta dal chatbot
+    response = chat(prompt_setting, input_text)
+    
+    # Aggiorna la cronologia con il messaggio dell'utente e la risposta del chatbot
+    history.append({"role": "user", "content": input_text})
+    history.append({"role": "assistant", "content": response})
+    
+    # Restituisci il contenuto aggiornato del chatbot e la cronologia
+    return history, history
 
 # Funzione per selezionare o deselezionare un ingrediente
 def toggle_ingrediente(ingredienti):
     global ingredienti_selezionati
-    print(f"Ingredienti selezionati prima dell'aggiornamento: {ingredienti_selezionati}")
+
     if isinstance(ingredienti, list):
         ingredienti_selezionati = ingredienti
-    print(f"Ingredienti selezionati dopo l'aggiornamento: {ingredienti_selezionati}")
+
     return ", ".join(ingredienti_selezionati)
 
 # Aggiungi un ingrediente personalizzato
@@ -119,37 +127,28 @@ def aggiungi_personalizzato(ingrediente):
         ingredienti_comuni.append(ingrediente)
     return gr.update(choices=ingredienti_comuni)
 
-
 # Rimuovi un ingrediente personalizzato
 def rimuovi_personalizzato(ingredienti_da_rimuovere):
     global ingredienti_comuni, ingredienti_selezionati
 
-    # Debug: Verifica gli ingredienti da rimuovere
-    print(f"Ingredienti da rimuovere: {ingredienti_da_rimuovere}")
-
-    # Rimuovi gli ingredienti dalla lista degli ingredienti comuni
+    # Rimuovi gli ingredienti dalla lista degli ingredienti comuni e selezionati
     for ingrediente in ingredienti_da_rimuovere:
         if ingrediente in ingredienti_comuni:
             ingredienti_comuni.remove(ingrediente)
         if ingrediente in ingredienti_selezionati:
             ingredienti_selezionati.remove(ingrediente)
 
-    # Debug: Stato aggiornato delle liste
-    print(f"Ingredienti comuni aggiornati: {ingredienti_comuni}")
-    print(f"Ingredienti selezionati aggiornati: {ingredienti_selezionati}")
-
     # Sincronizza i valori selezionati con le scelte disponibili
     ingredienti_selezionati = [ingrediente for ingrediente in ingredienti_selezionati if ingrediente in ingredienti_comuni]
-    
-    # Restituisci solo i valori attesi dai componenti
-    return gr.update(choices=ingredienti_comuni), ", ".join(ingredienti_selezionati)
+
+    # Aggiorna il CheckboxGroup e il riquadro degli ingredienti selezionati
+    return gr.update(choices=ingredienti_comuni, value=ingredienti_selezionati), ", ".join(ingredienti_selezionati)
 
 # Funzione svuota_casella per svuotare la casella di testo
 def svuota_casella():
     return ""
 
-
-#interfaccia gradio
+# Interfaccia gradio
 def gradio_interface(input_text):
     response = chat(prompt_setting, input_text)
     return response
@@ -202,8 +201,7 @@ def gradio_interface():
                     inputs=[input_textbox, history],
                     outputs=[chatbot_interface, input_textbox, history]
                 )
-                
-                   
+                         
             # Colonna destra: Ingredienti
             with gr.Column(scale=1):
                 gr.Markdown("### Ingredienti selezionati")
@@ -218,8 +216,11 @@ def gradio_interface():
                     fn=invia_ingredienti,
                     inputs=[history],
                     outputs=[chatbot_interface, history]
+                ).then(
+                    fn=svuota_casella,
+                    inputs=[],
+                    outputs=[input_textbox]
                 )
-                
                 
                 gr.Markdown("### Ingredienti disponibili")
                 ingredienti_pillole = gr.CheckboxGroup(
@@ -252,6 +253,10 @@ def gradio_interface():
                         fn=aggiungi_personalizzato,
                         inputs=[nuovo_ingrediente],
                         outputs=[ingredienti_pillole]
+                    ).then(
+                        fn=svuota_casella,
+                        inputs=[],
+                        outputs=[nuovo_ingrediente]
                     )
 
 
@@ -265,70 +270,7 @@ def gradio_interface():
     return demo
 
 
-
 if __name__ == "__main__":
-    print("Welcome to the AI Chatbot!")
-    print("Type 'exit' to quit the chat.")
-    
-    # Avvia l'interfaccia Gradio
     demo = gradio_interface()
     demo.launch(share=True)
     
-
-
-"""
-# Lista per gli ingredienti selezionati
-ingredienti_selezionati = []
-
-# Funzione per aggiungere o rimuovere un ingrediente
-def toggle_ingrediente(ingredienti):
-    global ingredienti_selezionati
-    print(f"Ingredienti selezionati prima dell'aggiornamento: {ingredienti_selezionati}")
-    if isinstance(ingredienti, list):
-        ingredienti_selezionati = ingredienti
-    print(f"Ingredienti selezionati dopo l'aggiornamento: {ingredienti_selezionati}")
-    return ", ".join(ingredienti_selezionati)
-
-# Funzione per aggiungere un ingrediente personalizzato
-def aggiungi_personalizzato(ingrediente):
-    global ingredienti_comuni
-    #capitalize the first letter
-    ingrediente = ingrediente.capitalize()
-    
-    if ingrediente and ingrediente not in ingredienti_comuni:
-        ingredienti_comuni.append(ingrediente)
-    return gr.update(choices=ingredienti_comuni)
-
-def rimuovi_personalizzato(ingredienti_da_rimuovere):
-    global ingredienti_comuni, ingredienti_selezionati
-
-    # Debug: Verifica gli ingredienti da rimuovere
-    print(f"Ingredienti da rimuovere: {ingredienti_da_rimuovere}")
-
-    # Rimuovi gli ingredienti dalla lista degli ingredienti comuni
-    for ingrediente in ingredienti_da_rimuovere:
-        if ingrediente in ingredienti_comuni:
-            ingredienti_comuni.remove(ingrediente)
-        if ingrediente in ingredienti_selezionati:
-            ingredienti_selezionati.remove(ingrediente)
-
-    # Debug: Stato aggiornato delle liste
-    print(f"Ingredienti comuni aggiornati: {ingredienti_comuni}")
-    print(f"Ingredienti selezionati aggiornati: {ingredienti_selezionati}")
-
-    # Sincronizza i valori selezionati con le scelte disponibili
-    ingredienti_selezionati = [ingrediente for ingrediente in ingredienti_selezionati if ingrediente in ingredienti_comuni]
-    
-    # Restituisci solo i valori attesi dai componenti
-    return gr.update(choices=ingredienti_comuni), ", ".join(ingredienti_selezionati)
-
-# Funzione per inviare gli ingredienti selezionati al chatbot
-def invia_ingredienti(history):
-    input_text = ", ".join(ingredienti_selezionati)
-    return chatbot(input_text, history)
-
-def svuota_casella():
-    # Restituisce una stringa vuota per pulire la casella di testo
-    return ""
-
-"""
