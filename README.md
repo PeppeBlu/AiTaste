@@ -24,71 +24,58 @@
 
 ## 🔧 Installation
 
-1. **Clone the repository**:
+1. **Clone the repository:**
 
    ```bash
    git clone https://github.com/yourusername/aitaste.git
    cd aitaste
 
-	2.	Create a virtual environment (optional but recommended):
 
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+2.	**Create a virtual environment (optional but recommended):**
 
-
-	3.	Install dependencies:
-
-pip install -r requirements.txt
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 
-	4.	Create a .env file named config.env and add your Groq API key:
+3.	**Install dependencies:**
 
-GROQ_API_KEY=your_api_key_here
+    ```bash
+    pip install -r requirements.txt
 
+
+4.	Create a .env file named config.env and add your Groq API key:
+
+    GROQ_API_KEY=your_api_key_here
 
 
 ⸻
 
-▶️ Run the App
+**▶️ Run the App**
 
 Start the app with:
 
-python aitaste.py
+    python aitaste.py
 
 The app will launch locally, and a shareable public link will be available via Gradio.
 
 ⸻
 
-📦 Requirements
-
-Here’s a sample requirements.txt:
-
-gradio
-python-dotenv
-groq
-
-You can generate it with:
-
-pip freeze > requirements.txt
-
-
-
-⸻
-
-💡 How It Works
-	1.	Select or add ingredients using the right-hand panel.
-	2.	Click Set Ingredients to send them to the AI.
-	3.	The AI replies with:
-	•	Key affinities between ingredients
-	•	Suggested cooking technique
-	•	A creative dish composition based on food chemistry
-	4.	Or simply chat freely in the chatbox on the left.
+**💡 How It Works**
+1.	Select or add ingredients using the right-hand panel.
+2.	Click Set Ingredients to send them to the AI.
+3.	The AI replies with:
+    •	Key affinities between ingredients
+    •	Suggested cooking technique
+    •	A creative dish composition based on food chemistry
+4.	Or simply chat freely in the chatbox on the left.
 
 ⸻
 
 📷 UI Preview (Optional)
 
 Add a screenshot here to show off the interface.
+
 
 ⸻
 

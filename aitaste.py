@@ -174,7 +174,7 @@ def send_message(message, history):
 def gradio_interface():
     # Inizializza la lista di ingredienti comuni per ogni sessione
     global ingredienti_comuni
-    with gr.Blocks() as demo:
+    with gr.Blocks(title="AiTaste") as demo:
         gr.Markdown("<h1 style='text-align: center;'>👩‍🍳 AiTaste - Find the best combos 👨‍🍳</h1>")
         
         with gr.Row():
