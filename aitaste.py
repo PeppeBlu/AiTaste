@@ -5,6 +5,25 @@ import datetime
 from dotenv import load_dotenv
 import gradio as gr
 
+ingredienti_comuni = [
+    "Pomodoro",
+    "Basilico",
+    "Mozzarella",
+    "Olio d'oliva",
+    "Aglio",
+    "Peperoncino",
+    "Sale",
+    "Pepe nero",
+    "Origano",
+    "Acciughe",
+    "Capperi",
+    "Funghi",
+    "Zucchine",
+    "Melanzane",
+    "Carciofi",
+    "Prosciutto crudo",
+    "Salame piccante"
+]
 
 prompt_setting = """ Agisci come uno chef  
     stellato ed esperto di chimica alimentare, specializzato in abbinamenti molecolari e sinergie gustative.
@@ -92,6 +111,71 @@ ai_taste_face = gr.Interface(
     theme="default"
 )
 
+# Interfaccia Gradio
+def gradio_interface():
+    # Inizializza la lista di ingredienti comuni per ogni sessione
+    global ingredienti_comuni
+    with gr.Blocks() as demo:
+        gr.Markdown("<h1 style='text-align: center;'>👩‍🍳 AiTaste - Find the best combos 👨‍🍳</h1>")
+        
+        with gr.Row():
+            # Colonna sinistra: Chatbot
+            with gr.Column(scale=2):
+                chatbot_interface = gr.Chatbot(label="Chatbot", height=500, type="messages")
+                history = gr.State([])
+                input_textbox = gr.Textbox(
+                    label="Scrivi qui il tuo messaggio",
+                    placeholder="Scrivi qui il tuo messaggio...",
+                    show_label=False,
+                    lines=1,
+                    max_lines=1
+                )
+                submit_button = gr.Button("Invia")
+
+                submit_button.click(
+                    fn=gradio_interface,
+                    inputs=[input_textbox],
+                    outputs=[chatbot_interface, history],
+                    api_name="submit",
+                    show_progress=True
+                )
+                input_textbox.submit(
+                    fn=gradio_interface,
+                    inputs=[input_textbox],
+                    outputs=[chatbot_interface, history],
+                    api_name="submit",
+                    show_progress=True
+                )
+
+                  
+            # Colonna destra: Ingredienti
+            with gr.Column(scale=1):
+                gr.Markdown("### Ingredienti selezionati")
+                ingredienti_selezionati_box = gr.Textbox(
+                    label="",
+                    interactive=False
+                )
+                set_ingredienti_button = gr.Button("Set Ingredienti")
+                
+                
+                gr.Markdown("### Ingredienti disponibili")
+                ingredienti_pillole = gr.CheckboxGroup(
+                    choices=ingredienti_comuni,
+                    label="",
+                    interactive=True
+                )
+                
+
+                gr.Markdown("### Aggiungi un ingrediente personalizzato")
+                nuovo_ingrediente = gr.Textbox(
+                    placeholder="Inserisci un nuovo ingrediente..."
+                )
+               
+                with gr.Row():
+                    aggiungi_button = gr.Button("Aggiungi")
+                    rimuovi_button = gr.Button("Rimuovi")                
+
+    return demo
 
 
 
@@ -100,5 +184,6 @@ if __name__ == "__main__":
     print("Type 'exit' to quit the chat.")
     
     # Avvia l'interfaccia Gradio
-    ai_taste_face.launch()
+    demo = gradio_interface()
+    demo.launch(share=True)
     
