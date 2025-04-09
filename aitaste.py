@@ -2,6 +2,7 @@
 from groq import Groq
 import os
 import datetime
+from dotenv import load_dotenv
 
 prompt_setting = """ Agisci come uno chef  
     stellato ed esperto di chimica alimentare, specializzato in abbinamenti molecolari e sinergie gustative.
@@ -22,9 +23,15 @@ prompt_setting = """ Agisci come uno chef
     Rispondi in italiano. Mantineti il formato e la struttura della risposta, senza aggiungere altro.
     """
 
+# Specifica il percorso del file config.env
+load_dotenv(dotenv_path="config.env")
+
+# Ora puoi accedere alla variabile d'ambiente
 client = Groq(
-    api_key="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"
+    api_key=os.getenv("GROQ_API_KEY")
 )
+
+print("Key succesfully read from environment variable.")
 
 def chat(prompt_setting, user_input):
     """
