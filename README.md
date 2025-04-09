@@ -65,9 +65,9 @@ The app will launch locally, and a shareable public link will be available via G
 1.	Select or add ingredients using the right-hand panel.
 2.	Click Set Ingredients to send them to the AI.
 3.	The AI replies with:
-    •	Key affinities between ingredients
-    •	Suggested cooking technique
-    •	A creative dish composition based on food chemistry
+    - Key affinities between ingredients
+    - Suggested cooking technique
+    - A creative dish composition based on food chemistry
 4.	Or simply chat freely in the chatbox on the left.
 
 ⸻
