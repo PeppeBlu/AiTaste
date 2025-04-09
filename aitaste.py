@@ -52,8 +52,6 @@ client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
 
-print("Key succesfully read from environment variable.")
-
 def chat(prompt_setting, user_input):
     """
     Function to send a chat message to the AI model and receive a response.
@@ -94,7 +92,11 @@ def chat(prompt_setting, user_input):
         contentR = content[:start_index] + content[end_index:]
     
     return contentR.strip()
-   
+
+def invia_ingredienti(history):
+    input_text = ", ".join(ingredienti_selezionati)
+    return chat(input_text, history)
+  
 #interfaccia gradio
 def gradio_interface(input_text):
     response = chat(prompt_setting, input_text)
@@ -161,9 +163,9 @@ def gradio_interface():
                 set_ingredienti_button = gr.Button("Set Ingredienti")
                 #se clicco Set Ingredienti, viene inviasto il messaggio al chatbot e pulito il textbox
                 set_ingredienti_button.click(
-                    lambda x: gr.update(value=x),
-                    inputs=[ingredienti_selezionati_box],
-                    outputs=[input_textbox]
+                    fn=invia_ingredienti,
+                    inputs=[history],
+                    outputs=[chatbot_interface, history]
                 )
                 
                 
