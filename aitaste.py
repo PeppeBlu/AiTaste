@@ -3,6 +3,8 @@ from groq import Groq
 import os
 import datetime
 from dotenv import load_dotenv
+import gradio as gr
+
 
 prompt_setting = """ Agisci come uno chef  
     stellato ed esperto di chimica alimentare, specializzato in abbinamenti molecolari e sinergie gustative.
@@ -66,24 +68,37 @@ def chat(prompt_setting, user_input):
 
     content = response.choices[0].message.content.strip()
     
-    #  controlla se nellar isposta è presente la stringa "<think>"
+    #  controlla se nella risposta è presente la stringa "<think>" e rimuove quella parte
+    # Se "<think>" è presente, rimuovi il contenuto tra "<think>" e "</think>"
     if "<think>" in content:
-        contentR = content.replace("<think>", "").replace("</think>", "").strip()
+        start_index = content.index("<think>")
+        end_index = content.index("</think>") + len("</think>")
+        contentR = content[:start_index] + content[end_index:]
     
-    return contentR
+    return contentR.strip()
    
+#interfaccia gradio
+def gradio_interface(input_text):
+    response = chat(prompt_setting, input_text)
+    return response
+
+# Crea l'interfaccia Gradio
+ai_taste_face = gr.Interface(
+    fn=gradio_interface,
+    inputs="text",
+    outputs="text",
+    title="AI Chatbot",
+    description="Chat with an AI model.",
+    theme="default"
+)
+
+
 
 
 if __name__ == "__main__":
     print("Welcome to the AI Chatbot!")
     print("Type 'exit' to quit the chat.")
     
-    while True:
-        user_input = input("\n\nYou: ")
-        if user_input.lower() == "exit":
-            print("Exiting the chat. Goodbye!")
-            break
-        response = chat(prompt_setting, user_input)
-
-        print("\n\nAI:", response)
+    # Avvia l'interfaccia Gradio
+    ai_taste_face.launch()
     
