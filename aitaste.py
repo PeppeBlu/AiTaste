@@ -36,12 +36,12 @@ prompt_setting = """ Agisci come uno chef
     Combina per contrasto o armonia, non solo per tradizione.
     Suggerisci tecniche (es. spume, infusioni a freddo) per esaltare le proprietà chimiche.
     Struttura la risposta in:"
-    Risposta:
     Affinità chiave: Legami chimici tra gli ingredienti (max 3 punti).
     Tecnica consigliata: Metodo di cottura/preparazione ottimale.
     Composizione proposta: Nome creativo + ingredienti aggiuntivi (max 2) con motivazione scientifica.
     Suggerisci un piatto gourmet innovativo, evidenziando le sinergie chimiche e le tecniche culinarie.
-    Rispondi in italiano. Mantineti il formato e la struttura della risposta, senza aggiungere altro.
+    Rispondi in italiano. Mantineti il formato e la struttura della risposta, senza aggiungere altri ingredienti oltre
+    a quelli inseriti dall'utente.
     """
 
 # Specifica il percorso del file config.env
@@ -58,7 +58,6 @@ def chat(prompt_setting, user_input):
     """
     Function to send a chat message to the AI model and receive a response.
     """
-    
     try:
         response = client.chat.completions.create(
             model="deepseek-r1-distill-llama-70b",
@@ -111,6 +110,13 @@ ai_taste_face = gr.Interface(
     theme="default"
 )
 
+# Funzione per inviare il messaggio e ricevere la risposta
+def send_message(message, history):
+    history.append({"role": "user", "content": message})
+    response = chat(prompt_setting, message)
+    history.append({"role": "assistant", "content": response})
+    return history, "", history
+
 # Interfaccia Gradio
 def gradio_interface():
     # Inizializza la lista di ingredienti comuni per ogni sessione
@@ -130,32 +136,35 @@ def gradio_interface():
                     lines=1,
                     max_lines=1
                 )
-                submit_button = gr.Button("Invia")
-
-                submit_button.click(
-                    fn=gradio_interface,
-                    inputs=[input_textbox],
-                    outputs=[chatbot_interface, history],
-                    api_name="submit",
-                    show_progress=True
-                )
                 input_textbox.submit(
-                    fn=gradio_interface,
-                    inputs=[input_textbox],
-                    outputs=[chatbot_interface, history],
-                    api_name="submit",
-                    show_progress=True
+                    send_message,
+                    inputs=[input_textbox, history],
+                    outputs=[chatbot_interface, input_textbox, history]
                 )
-
-                  
+                
+                submit_button = gr.Button("Invia")
+                submit_button.click(
+                    send_message,
+                    inputs=[input_textbox, history],
+                    outputs=[chatbot_interface, input_textbox, history]
+                )
+                
+                   
             # Colonna destra: Ingredienti
             with gr.Column(scale=1):
                 gr.Markdown("### Ingredienti selezionati")
                 ingredienti_selezionati_box = gr.Textbox(
                     label="",
-                    interactive=False
+                     interactive=False
                 )
+                
                 set_ingredienti_button = gr.Button("Set Ingredienti")
+                #se clicco Set Ingredienti, viene inviasto il messaggio al chatbot e pulito il textbox
+                set_ingredienti_button.click(
+                    lambda x: gr.update(value=x),
+                    inputs=[ingredienti_selezionati_box],
+                    outputs=[input_textbox]
+                )
                 
                 
                 gr.Markdown("### Ingredienti disponibili")
