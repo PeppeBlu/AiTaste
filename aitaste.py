@@ -210,7 +210,7 @@ def gradio_interface():
                      interactive=False
                 )
                 
-                set_ingredienti_button = gr.Button("Set Ingredienti")
+                set_ingredienti_button = gr.Button("Invia Ingredienti")
                 #se clicco Set Ingredienti, viene inviasto il messaggio al chatbot e pulito il textbox
                 set_ingredienti_button.click(
                     fn=invia_ingredienti,
