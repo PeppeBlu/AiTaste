@@ -1,3 +1,9 @@
+---
+title: AiTaste
+app_file: aitaste.py
+sdk: gradio
+sdk_version: 5.23.3
+---
 # 🍽️ AiTaste – AI Assistant for Gourmet Flavor Pairing
 
 **AiTaste** is a web app powered by AI that helps you create innovative and scientifically grounded ingredient combinations. With a clean and interactive interface, you can select ingredients, add custom ones, and get suggestions from an **AI chef specialized in food chemistry and molecular gastronomy**.
@@ -68,7 +74,7 @@ The app will launch locally, and a shareable public link will be available via G
     - Key affinities between ingredients
     - Suggested cooking technique
     - A creative dish composition based on food chemistry
-- Or simply chat freely in the chatbox on the left.
+**-** You can also interact directly from chatbox on the left
 
 ⸻
 
