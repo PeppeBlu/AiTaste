@@ -73,7 +73,7 @@ def chat(prompt_setting, user_input):
                 }
             ],
             temperature=1,
-            max_tokens=1024,
+            max_tokens=2048,
             top_p=1,
             stream=False,
             stop=None,
@@ -81,8 +81,6 @@ def chat(prompt_setting, user_input):
 
         content = response.choices[0].message.content.strip()
     
-        #  controlla se nella risposta è presente la stringa "<think>" e rimuove quella parte
-        # Se "<think>" è presente, rimuovi il contenuto tra "<think>" e "</think>"
         if "<think>" in content:
             start_index = content.index("<think>")
             end_index = content.index("</think>") + len("</think>")
