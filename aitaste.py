@@ -214,10 +214,6 @@ def gradio_interface():
                     fn=invia_ingredienti,
                     inputs=[history],
                     outputs=[chatbot_interface, history]
-                ).then(
-                    fn=svuota_casella,
-                    inputs=[],
-                    outputs=[input_textbox]
                 )
                 
                 gr.Markdown("### Ingredienti disponibili")
@@ -241,6 +237,16 @@ def gradio_interface():
                 with gr.Row():
                     aggiungi_button = gr.Button("Aggiungi")
                     #aggiunge l'ingrediente personalizzato alla lista ingredienti_comuni e pulisce il textbox
+                    aggiungi_button.submit(
+                        fn=aggiungi_personalizzato,
+                        inputs=[nuovo_ingrediente],
+                        outputs=[ingredienti_pillole]
+                    ).then(
+                        fn=svuota_casella,
+                        inputs=[],
+                        outputs=[nuovo_ingrediente]
+                    )
+                    
                     aggiungi_button.click(
                         fn=aggiungi_personalizzato,
                         inputs=[nuovo_ingrediente],
