@@ -91,16 +91,21 @@ def chat(prompt_setting, user_input):
     except Exception as e:
         print("Error:", str(e))
 
+def show_ingredient_input(history):
+    input_text = ", ".join(ingredienti_selezionati)
+    history.append({"role": "user", "content": input_text})
+
+    return history, history
+
 # Funzione per inviare gli ingredienti selezionati al chatbot
 def invia_ingredienti(history):
     # Combina gli ingredienti selezionati in una stringa
-    input_text = ", ".join(ingredienti_selezionati)
     
+    input_text = ", ".join(ingredienti_selezionati)
     # Ottieni la risposta dal chatbot
     response = chat(prompt_setting, input_text)
     
     # Aggiorna la cronologia con il messaggio dell'utente e la risposta del chatbot
-    history.append({"role": "user", "content": input_text})
     history.append({"role": "assistant", "content": response})
     
     # Restituisci il contenuto aggiornato del chatbot e la cronologia
@@ -161,12 +166,19 @@ ai_taste_face = gr.Interface(
     theme="default"
 )
 
+def show_user_input(history, input_text):
+
+    # Aggiungi il messaggio dell'utente alla cronologia
+    history.append({"role": "user", "content": input_text})
+    
+    # Restituisci la cronologia aggiornata
+    return history, history
+
 # Funzione per inviare il messaggio e ricevere la risposta
 def send_message(message, history):
-    history.append({"role": "user", "content": message})
     response = chat(prompt_setting, message)
     history.append({"role": "assistant", "content": response})
-    return history, "", history
+    return history, history
 
 # Interfaccia Gradio
 def gradio_interface():
@@ -188,16 +200,32 @@ def gradio_interface():
                     max_lines=1
                 )
                 input_textbox.submit(
+                    fn=show_user_input,
+                    inputs=[history, input_textbox],
+                    outputs=[chatbot_interface, history]
+                ).then(
                     send_message,
                     inputs=[input_textbox, history],
-                    outputs=[chatbot_interface, input_textbox, history]
+                    outputs=[chatbot_interface, history]
+                ).then(
+                    fn=svuota_casella,
+                    inputs=[],
+                    outputs=[input_textbox]
                 )
                 
                 submit_button = gr.Button("Invia")
                 submit_button.click(
+                    fn=show_user_input,
+                    inputs=[history, input_textbox],
+                    outputs=[chatbot_interface, history]
+                ).then(
                     send_message,
                     inputs=[input_textbox, history],
-                    outputs=[chatbot_interface, input_textbox, history]
+                    outputs=[chatbot_interface, history]
+                ).then(
+                    fn=svuota_casella,
+                    inputs=[],
+                    outputs=[input_textbox]
                 )
                          
             # Colonna destra: Ingredienti
@@ -211,6 +239,10 @@ def gradio_interface():
                 set_ingredienti_button = gr.Button("Invia Ingredienti")
                 #se clicco Set Ingredienti, viene inviasto il messaggio al chatbot e pulito il textbox
                 set_ingredienti_button.click(
+                    fn=show_ingredient_input,
+                    inputs=[history],
+                    outputs=[chatbot_interface, history]
+                ).then(
                     fn=invia_ingredienti,
                     inputs=[history],
                     outputs=[chatbot_interface, history]
@@ -237,7 +269,7 @@ def gradio_interface():
                 with gr.Row():
                     aggiungi_button = gr.Button("Aggiungi")
                     #aggiunge l'ingrediente personalizzato alla lista ingredienti_comuni e pulisce il textbox
-                    aggiungi_button.submit(
+                    nuovo_ingrediente.submit(
                         fn=aggiungi_personalizzato,
                         inputs=[nuovo_ingrediente],
                         outputs=[ingredienti_pillole]
