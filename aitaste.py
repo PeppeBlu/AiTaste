@@ -1,7 +1,6 @@
 
 from groq import Groq
 import os
-import datetime
 from dotenv import load_dotenv
 import gradio as gr
 
@@ -25,34 +24,35 @@ ingredienti_comuni = [
     "Salame piccante"
 ]
 
-prompt_setting = """ Agisci come uno chef  
-    stellato ed esperto di chimica alimentare, specializzato in abbinamenti molecolari e sinergie gustative.
-    Quando riceverai una lista di ingredienti, analizzali seguendo questi criteri:
-    Principi scientifici:
-    Identifica composti aromatici condivisi (es. aldeidi, terpeni).
-    Valuta interazioni tra elementi (es. contrasto dolce/salato, equilibrio acido/grasso).
-    Considera reazioni chimiche (es. Maillard, caramellizzazione).
-    Abbinamenti innovativi: 
-    Combina per contrasto o armonia, non solo per tradizione.
-    Suggerisci tecniche (es. spume, infusioni a freddo) per esaltare le proprietà chimiche.
-    Struttura la risposta in:"
-    Affinità chiave: Legami chimici tra gli ingredienti (max 3 punti).
-    Tecnica consigliata: Metodo di cottura/preparazione ottimale.
-    Composizione proposta: Nome creativo + ingredienti aggiuntivi (max 2) con motivazione scientifica.
-    Suggerisci un piatto gourmet innovativo, evidenziando le sinergie chimiche e le tecniche culinarie.
-    Rispondi in italiano. Mantineti il formato e la struttura della risposta, senza aggiungere altri ingredienti oltre
-    a quelli inseriti dall'utente.
-    """
+
 
 ingredienti_selezionati = []
 
 # Specifica il percorso del file config.env
 load_dotenv(dotenv_path="config.env")
 
+prompt_setting = os.getenv("PROMPT_SETTING")
+
 # Ora puoi accedere alla variabile d'ambiente
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
+
+
+# Healt check
+def health_check():
+    if prompt_setting is None:
+        raise ValueError("La variabile d'ambiente 'PROMPT_SETTING' non è stata trovata nel file config.env.")
+    if client is None:
+        raise ValueError("La variabile d'ambiente 'GROQ_API_KEY' non è stata trovata nel file config.env.")
+
+    # Verifica se la chiave API è valida
+    try:
+        client.models.list()
+    except Exception as e:
+        raise ValueError("La chiave API non è valida o non è stata trovata nel file config.env.") from e
+    
+    return True
 
 def chat(prompt_setting, user_input):
     """
@@ -73,7 +73,7 @@ def chat(prompt_setting, user_input):
                 }
             ],
             temperature=1,
-            max_tokens=1024,
+            max_tokens=2048,
             top_p=1,
             stream=False,
             stop=None,
@@ -81,8 +81,6 @@ def chat(prompt_setting, user_input):
 
         content = response.choices[0].message.content.strip()
     
-        #  controlla se nella risposta è presente la stringa "<think>" e rimuove quella parte
-        # Se "<think>" è presente, rimuovi il contenuto tra "<think>" e "</think>"
         if "<think>" in content:
             start_index = content.index("<think>")
             end_index = content.index("</think>") + len("</think>")
@@ -174,8 +172,8 @@ def send_message(message, history):
 def gradio_interface():
     # Inizializza la lista di ingredienti comuni per ogni sessione
     global ingredienti_comuni
-    with gr.Blocks() as demo:
-        gr.Markdown("<h1 style='text-align: center;'>👩‍🍳 AiTaste - Find the best combos 👨‍🍳</h1>")
+    with gr.Blocks(title="AiTaste") as demo:
+        gr.Markdown("<h1 style='text-align: center;'>👩‍🍳 AiTaste - Find the best combos 👨‍🍳</h1>", elem_id="title")
         
         with gr.Row():
             # Colonna sinistra: Chatbot
@@ -210,16 +208,12 @@ def gradio_interface():
                      interactive=False
                 )
                 
-                set_ingredienti_button = gr.Button("Set Ingredienti")
+                set_ingredienti_button = gr.Button("Invia Ingredienti")
                 #se clicco Set Ingredienti, viene inviasto il messaggio al chatbot e pulito il textbox
                 set_ingredienti_button.click(
                     fn=invia_ingredienti,
                     inputs=[history],
                     outputs=[chatbot_interface, history]
-                ).then(
-                    fn=svuota_casella,
-                    inputs=[],
-                    outputs=[input_textbox]
                 )
                 
                 gr.Markdown("### Ingredienti disponibili")
@@ -234,12 +228,6 @@ def gradio_interface():
                     inputs=[ingredienti_pillole],
                     outputs=[ingredienti_selezionati_box]
                 )
-
-                input_textbox.change(
-                    fn=svuota_casella,
-                    inputs=[],
-                    outputs=[input_textbox]
-                )
                 
                 gr.Markdown("### Aggiungi un ingrediente personalizzato")
                 nuovo_ingrediente = gr.Textbox(
@@ -249,6 +237,16 @@ def gradio_interface():
                 with gr.Row():
                     aggiungi_button = gr.Button("Aggiungi")
                     #aggiunge l'ingrediente personalizzato alla lista ingredienti_comuni e pulisce il textbox
+                    aggiungi_button.submit(
+                        fn=aggiungi_personalizzato,
+                        inputs=[nuovo_ingrediente],
+                        outputs=[ingredienti_pillole]
+                    ).then(
+                        fn=svuota_casella,
+                        inputs=[],
+                        outputs=[nuovo_ingrediente]
+                    )
+                    
                     aggiungi_button.click(
                         fn=aggiungi_personalizzato,
                         inputs=[nuovo_ingrediente],
@@ -270,7 +268,12 @@ def gradio_interface():
     return demo
 
 
+
 if __name__ == "__main__":
-    demo = gradio_interface()
-    demo.launch(share=True)
+    if health_check():
+        demo = gradio_interface()
+        demo.launch(share=True)
+    else:
+        print("Errore durante il controllo della salute dell'app.")
+        exit(1)
     
