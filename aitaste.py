@@ -132,13 +132,13 @@ def svuota_casella():
     return ""
 
 # Interfaccia gradio
-def gradio_interface(input_text):
+def chatbot_interface(input_text):
     response = chat(prompt_setting, input_text)
     return response
 
 # Crea l'interfaccia Gradio
 ai_taste_face = gr.Interface(
-    fn=gradio_interface,
+    fn=chatbot_interface,
     inputs="text",
     outputs="text",
     title="AI Chatbot",
@@ -176,18 +176,60 @@ def invia_ingredienti(history):
     # Restituisci il contenuto aggiornato del chatbot e la cronologia
     return history, history
 
+def cambia_interfaccia(stato):
+    if stato == "signup":
+        return gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
+    elif stato == "main":
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)
+    else:  # Stato "login"
+        return gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)
 
+# Funzione che mostra la pagina di login
+def show_login():
+    return gr.update(visible=True), gr.update(visible=False)
 
+# Finta autenticazione
+def user_login(username, password):
+    if True:
+        # Nascondi il login e mostra la chat
+        return gr.update(visible=True), gr.update(visible=False), ""
+    else:
+        # Mostra un messaggio di errore
+        return gr.update(visible=False), gr.update(visible=True), "Credenziali errate"
+
+def user_login_after_sign_up(username, password):
+    if True:
+        # Nascondi il login e mostra la chat
+        return gr.update(visible=True), gr.update(visible=False), "", username
+    
+    
+# Funzione per la registrazione
+def sign_in_interface():
+    return gr.update(visible=False), gr.update(visible=True), ""
+   
+       
 # Interfaccia Gradio
-def gradio_interface():
+def chatbot_interface():
     # Inizializza la lista di ingredienti comuni per ogni sessione
     global ingredienti_comuni
-    with gr.Blocks(title="AiTaste") as demo:
+    with gr.Blocks(title="AiTaste") as app:
         gr.Markdown("<h1 style='text-align: center;'>👩‍🍳 AiTaste - Find the best combos 👨‍🍳</h1>", elem_id="title")
         
-        with gr.Row():
+        chat = gr.Row(visible=False)
+        signup = gr.Column(visible=False)
+        login = gr.Column(visible=True)
+
+        with chat:
             # Colonna sinistra: Chatbot
             with gr.Column(scale=2):
+                with gr.Row():
+                    logout_button = gr.Button("LogOut")
+                    logout_button.click(
+                        fn=user_login,
+                        inputs=[],
+                        outputs=[login, chat]
+                    )
+                
                 chatbot_interface = gr.Chatbot(label="Chatbot", height=500, type="messages")
                 history = gr.State([])
                 input_textbox = gr.Textbox(
@@ -227,7 +269,7 @@ def gradio_interface():
                 )
                          
             # Colonna destra: Ingredienti
-            with gr.Column(scale=1):
+            with gr.Column(scale=2):
                 gr.Markdown("### Ingredienti selezionati")
                 ingredienti_selezionati_box = gr.Textbox(
                     label="",
@@ -293,16 +335,55 @@ def gradio_interface():
                         fn=rimuovi_personalizzato,
                         inputs=[ingredienti_pillole],
                         outputs=[ingredienti_pillole, ingredienti_selezionati_box]
-                    )                
+                    ) 
+            
+        
+        with login:
+            gr.Markdown("### Accedi al tuo account")
+            with login:
+                login_username = gr.Textbox(label="Nome utente", placeholder="Inserisci il tuo nome utente")
+                password = gr.Textbox(label="Password", type="password", placeholder="Inserisci la tua password")
+            
+            login_button = gr.Button("Accedi")
+            sign_in_button = gr.Button("Registrati")
+            error_box = gr.Textbox(visible=False, interactive=False, show_label=False)
 
-    return demo
+            login_button.click(
+                fn=user_login,
+                inputs=[login_username, password],
+                outputs=[chat, login, error_box]
+            )
 
+            sign_in_button.click(
+                fn=sign_in_interface,
+                inputs=[],
+                outputs=[login, signup, error_box]
+            )
+
+
+        with signup:
+            gr.Markdown("### Registrati per un nuovo account")
+            with signup:
+                username_signup = gr.Textbox(label="Nome utente", placeholder="Inserisci il tuo nome utente")
+                password_signup = gr.Textbox(label="Password", type="password", placeholder="Inserisci la tua password")
+                
+            
+            register_button = gr.Button("Registrati")
+            error_box = gr.Textbox(visible=False, interactive=False, show_label=False)
+            register_button.click(
+                fn=user_login_after_sign_up,
+                inputs=[username_signup, password_signup, ],
+                outputs=[login, signup, error_box, login_username]
+            )
+        
+
+    return app
 
 
 if __name__ == "__main__":
     if health_check():
-        demo = gradio_interface()
-        demo.launch(share=True)
+        demo = chatbot_interface()
+        demo.launch()
     else:
         print("Errore durante il controllo della salute dell'app.")
         exit(1)
