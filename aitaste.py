@@ -216,20 +216,12 @@ def chatbot_interface():
         gr.Markdown("<h1 style='text-align: center;'>👩‍🍳 AiTaste - Find the best combos 👨‍🍳</h1>", elem_id="title")
         
         chat = gr.Row(visible=False)
-        signup = gr.Column(visible=False)
-        login = gr.Column(visible=True)
+        signup = gr.Column(visible=False, elem_id="signup_column")
+        login = gr.Column(visible=True, elem_id="login_column")
 
         with chat:
             # Colonna sinistra: Chatbot
             with gr.Column(scale=2):
-                with gr.Row():
-                    logout_button = gr.Button("LogOut")
-                    logout_button.click(
-                        fn=user_login,
-                        inputs=[],
-                        outputs=[login, chat]
-                    )
-                
                 chatbot_interface = gr.Chatbot(label="Chatbot", height=500, type="messages")
                 history = gr.State([])
                 input_textbox = gr.Textbox(
@@ -253,7 +245,7 @@ def chatbot_interface():
                     outputs=[input_textbox]
                 )
                 
-                submit_button = gr.Button("Invia")
+                submit_button = gr.Button("Invia Messaggio")
                 submit_button.click(
                     fn=show_user_input,
                     inputs=[history, input_textbox],
@@ -317,7 +309,7 @@ def chatbot_interface():
                 )
                
                 with gr.Row():
-                    aggiungi_button = gr.Button("Aggiungi")
+                    aggiungi_button = gr.Button("Aggiungi ingrediente")
                     #aggiunge l'ingrediente personalizzato alla lista ingredienti_comuni e pulisce il textbox
                     aggiungi_button.click(
                         fn=aggiungi_personalizzato,
@@ -336,6 +328,14 @@ def chatbot_interface():
                         inputs=[ingredienti_pillole],
                         outputs=[ingredienti_pillole, ingredienti_selezionati_box]
                     ) 
+
+                with gr.Row():
+                    logout_button = gr.Button("LogOut", elem_id="logout_button")
+                    logout_button.click(
+                        fn=show_login,
+                        inputs=[],
+                        outputs=[login, chat]
+                    )
             
         
         with login:
