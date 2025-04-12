@@ -194,13 +194,13 @@ def user_login_after_sign_up(username, password):
     if True:
         # Nascondi il login e mostra la chat
         return gr.update(visible=True), gr.update(visible=False), "", username
-    
+
 
 # interfaccia del chatbot
 def chatbot_interface():
     # Inizializza la lista di ingredienti comuni per ogni sessione
     global ingredienti_comuni
-    with gr.Blocks(title="AiTaste") as app:
+    with gr.Blocks(title="AiTaste", fill_width=True) as app:
         gr.Markdown("<h1 style='text-align: center;'>👩‍🍳 AiTaste - Find the best combos 👨‍🍳</h1>", elem_id="title")
         
         chat = gr.Row(visible=False)
@@ -323,13 +323,16 @@ def chatbot_interface():
                         inputs=[],
                         outputs=[chat, login]
                     )
-            
+   
         
         with login:
             gr.Markdown("### Accedi al tuo account")
             with login:
-                login_username = gr.Textbox(label="Nome utente", placeholder="Inserisci il tuo nome utente")
-                password = gr.Textbox(label="Password", type="password", placeholder="Inserisci la tua password")
+                login_username = gr.Textbox(label="Nome utente", 
+                                            placeholder="Inserisci il tuo nome utente")
+                password = gr.Textbox(label="Password", 
+                                      type="password", 
+                                      placeholder="Inserisci la tua password")
             
             login_button = gr.Button("Accedi")
             sign_in_button = gr.Button("Registrati")
@@ -362,7 +365,7 @@ def chatbot_interface():
                 inputs=[username_signup, password_signup, ],
                 outputs=[login, signup, error_box, login_username]
             )
-        
+
 
     return app
 
@@ -374,4 +377,3 @@ if __name__ == "__main__":
     else:
         print("Errore durante il controllo della salute dell'app.")
         exit(1)
-    
