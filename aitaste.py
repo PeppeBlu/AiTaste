@@ -4,42 +4,54 @@ import os
 from dotenv import load_dotenv
 import gradio as gr
 
+
 ingredienti_comuni = [
-    "Pomodoro",
-    "Basilico",
+    "Uova",
+    "Latte",
+    "Latte vegetale",
+    "Formaggio",
     "Mozzarella",
-    "Olio d'oliva",
-    "Aglio",
-    "Peperoncino",
-    "Sale",
-    "Pepe nero",
-    "Origano",
-    "Acciughe",
-    "Capperi",
-    "Funghi",
+    "Yogurt",
+    "Burro",
+    "Margarina",
+    "Passata di pomodoro",
+    "Salsa barbecue",
+    "Maionese",
+    "Ketchup",
+    "Senape",
+    "Carote",
     "Zucchine",
-    "Melanzane",
-    "Carciofi",
+    "Cipolla",
+    "Aglio",
+    "Mele",
+    "Banane",
+    "Limone",
+    "Prosciutto cotto",
     "Prosciutto crudo",
-    "Salame piccante"
+    "Tonno in scatola",
+    "Patatine fritte surgelate",
+    "Spinaci surgelati",
+    "Verdure miste surgelate",
+    "Pasta sfoglia",
+    "Pasta brisée",
+    "Parmigiano",
+    "Grana padano",
+    "Tofu",
+    "Hummus",
+    "Insalata in busta"
 ]
-
-
 
 ingredienti_selezionati = []
 
-# Specifica il percorso del file config.env
 load_dotenv(dotenv_path="config.env")
 
 prompt_setting = os.getenv("PROMPT_SETTING")
 
-# Ora puoi accedere alla variabile d'ambiente
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
 
-
-# Healt check
+# controlla variabili d'ambiente e chiave API
 def health_check():
     if prompt_setting is None:
         raise ValueError("La variabile d'ambiente 'PROMPT_SETTING' non è stata trovata nel file config.env.")
@@ -54,6 +66,7 @@ def health_check():
     
     return True
 
+# invia input al modello e riceve la risposta
 def chat(prompt_setting, user_input):
     """
     Function to send a chat message to the AI model and receive a response.
@@ -91,7 +104,7 @@ def chat(prompt_setting, user_input):
     except Exception as e:
         print("Error:", str(e))
 
-# Funzione per selezionare o deselezionare un ingrediente
+# seleziona o deseleziona un ingrediente
 def toggle_ingrediente(ingredienti):
     global ingredienti_selezionati
 
@@ -100,7 +113,7 @@ def toggle_ingrediente(ingredienti):
 
     return ", ".join(ingredienti_selezionati)
 
-# Aggiungi un ingrediente personalizzato
+# aggiunge un ingrediente personalizzato
 def aggiungi_personalizzato(ingrediente):
     global ingredienti_comuni
     #capitalize the first letter
@@ -110,7 +123,7 @@ def aggiungi_personalizzato(ingrediente):
         ingredienti_comuni.append(ingrediente)
     return gr.update(choices=ingredienti_comuni)
 
-# Rimuovi un ingrediente personalizzato
+# rimuove un ingrediente personalizzato
 def rimuovi_personalizzato(ingredienti_da_rimuovere):
     global ingredienti_comuni, ingredienti_selezionati
 
@@ -127,42 +140,29 @@ def rimuovi_personalizzato(ingredienti_da_rimuovere):
     # Aggiorna il CheckboxGroup e il riquadro degli ingredienti selezionati
     return gr.update(choices=ingredienti_comuni, value=ingredienti_selezionati), ", ".join(ingredienti_selezionati)
 
-# Funzione svuota_casella per svuotare la casella di testo
+# svuota la casella di testo
 def svuota_casella():
     return ""
 
-# Interfaccia gradio
-def chatbot_interface(input_text):
-    response = chat(prompt_setting, input_text)
-    return response
-
-# Crea l'interfaccia Gradio
-ai_taste_face = gr.Interface(
-    fn=chatbot_interface,
-    inputs="text",
-    outputs="text",
-    title="AI Chatbot",
-    description="Chat with an AI model.",
-    theme="default"
-)
-
+# mostra l'input dell'utente nella chat
 def show_user_input(history, input_text):
     history.append({"role": "user", "content": input_text})
     return history, history
 
+# mostra l'input degli ingredienti nella chat
 def show_ingredient_input(history):
     input_text = ", ".join(ingredienti_selezionati)
     history.append({"role": "user", "content": input_text})
 
     return history
 
-# Funzione per inviare il messaggio e ricevere la risposta
+# invia il messaggio al modello e riceve la risposta
 def send_message(message, history):
     response = chat(prompt_setting, message)
     history.append({"role": "assistant", "content": response})
     return history, history
 
-# Funzione per inviare gli ingredienti selezionati al chatbot
+# invia gli ingredienti selezionati al chatbot
 def invia_ingredienti(history):
     # Combina gli ingredienti selezionati in una stringa
     
@@ -176,19 +176,11 @@ def invia_ingredienti(history):
     # Restituisci il contenuto aggiornato del chatbot e la cronologia
     return history, history
 
-def cambia_interfaccia(stato):
-    if stato == "signup":
-        return gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
-    elif stato == "main":
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)
-    else:  # Stato "login"
-        return gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)
+# switch tra due interfacce
+def from_to_interface():
+    return gr.update(visible=False), gr.update(visible=True)
 
-# Funzione che mostra la pagina di login
-def show_login():
-    return gr.update(visible=True), gr.update(visible=False)
-
-# Finta autenticazione
+# autenticazione
 def user_login(username, password):
     if True:
         # Nascondi il login e mostra la chat
@@ -197,18 +189,14 @@ def user_login(username, password):
         # Mostra un messaggio di errore
         return gr.update(visible=False), gr.update(visible=True), "Credenziali errate"
 
+# mostra la pagina di registrazione dopo la registrazione
 def user_login_after_sign_up(username, password):
     if True:
         # Nascondi il login e mostra la chat
         return gr.update(visible=True), gr.update(visible=False), "", username
     
-    
-# Funzione per la registrazione
-def sign_in_interface():
-    return gr.update(visible=False), gr.update(visible=True), ""
-   
-       
-# Interfaccia Gradio
+
+# interfaccia del chatbot
 def chatbot_interface():
     # Inizializza la lista di ingredienti comuni per ogni sessione
     global ingredienti_comuni
@@ -221,8 +209,8 @@ def chatbot_interface():
 
         with chat:
             # Colonna sinistra: Chatbot
-            with gr.Column(scale=2):
-                chatbot_interface = gr.Chatbot(label="Chatbot", height=500, type="messages")
+            with gr.Column(scale=3):
+                chatbot_interface = gr.Chatbot(label="Chatbot", height=750, type="messages")
                 history = gr.State([])
                 input_textbox = gr.Textbox(
                     label="Scrivi qui il tuo messaggio",
@@ -310,7 +298,7 @@ def chatbot_interface():
                
                 with gr.Row():
                     aggiungi_button = gr.Button("Aggiungi ingrediente")
-                    #aggiunge l'ingrediente personalizzato alla lista ingredienti_comuni e pulisce il textbox
+
                     aggiungi_button.click(
                         fn=aggiungi_personalizzato,
                         inputs=[nuovo_ingrediente],
@@ -320,7 +308,6 @@ def chatbot_interface():
                         inputs=[],
                         outputs=[nuovo_ingrediente]
                     )
-
 
                     rimuovi_button = gr.Button("Rimuovi")
                     rimuovi_button.click(
@@ -332,9 +319,9 @@ def chatbot_interface():
                 with gr.Row():
                     logout_button = gr.Button("LogOut", elem_id="logout_button")
                     logout_button.click(
-                        fn=show_login,
+                        fn=from_to_interface,
                         inputs=[],
-                        outputs=[login, chat]
+                        outputs=[chat, login]
                     )
             
         
@@ -355,9 +342,9 @@ def chatbot_interface():
             )
 
             sign_in_button.click(
-                fn=sign_in_interface,
+                fn=from_to_interface,
                 inputs=[],
-                outputs=[login, signup, error_box]
+                outputs=[login, signup]
             )
 
 
