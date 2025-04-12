@@ -67,24 +67,16 @@ def health_check():
     return True
 
 # invia input al modello e riceve la risposta
-def chat(prompt_setting, user_input):
+def chat(prompt_setting, history):
     """
     Function to send a chat message to the AI model and receive a response.
     """
+    messages = [{"role": "system", "content": prompt_setting}] + history
+
     try:
         response = client.chat.completions.create(
             model="deepseek-r1-distill-llama-70b",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt_setting
-                }
-                ,
-                {
-                    "role": "user",
-                    "content": user_input
-                }
-            ],
+            messages = messages, 
             temperature=1,
             max_tokens=2048,
             top_p=1,
@@ -158,7 +150,7 @@ def show_ingredient_input(history):
 
 # invia il messaggio al modello e riceve la risposta
 def send_message(message, history):
-    response = chat(prompt_setting, message)
+    response = chat(prompt_setting, history)
     history.append({"role": "assistant", "content": response})
     return history, history
 
@@ -168,7 +160,7 @@ def invia_ingredienti(history):
     
     input_text = ", ".join(ingredienti_selezionati)
     # Ottieni la risposta dal chatbot
-    response = chat(prompt_setting, input_text)
+    response = chat(prompt_setting, history)
     
     # Aggiorna la cronologia con il messaggio dell'utente e la risposta del chatbot
     history.append({"role": "assistant", "content": response})
