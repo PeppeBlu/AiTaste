@@ -80,21 +80,21 @@ def chat(prompt_setting, history):
             temperature=1,
             max_tokens=2048,
             top_p=1,
-            stream=False,
+            stream=True,
             stop=None,
         )
 
-        content = response.choices[0].message.content.strip()
-    
-        if "<think>" in content:
-            start_index = content.index("<think>")
-            end_index = content.index("</think>") + len("</think>")
-            contentR = content[:start_index] + content[end_index:]
-        
-        return contentR.strip()
+        # Costruisci la risposta in streaming
+        content = ""
+        for chunk in response:  # Itera sui token ricevuti
+            if "choices" in chunk and len(chunk["choices"]) > 0:
+                delta = chunk["choices"][0].get("delta", {}).get("content", "")
+                content += delta
+                yield content.strip()  # Invia la risposta parziale
 
     except Exception as e:
         print("Error:", str(e))
+        yield "Si è verificato un errore durante la generazione della risposta."
 
 # seleziona o deseleziona un ingrediente
 def toggle_ingrediente(ingredienti):
@@ -150,15 +150,16 @@ def show_ingredient_input(history):
 
 # invia il messaggio al modello e riceve la risposta
 def send_message(history):
-    response = chat(prompt_setting, history)
-    history.append({"role": "assistant", "content": response})
-    return history, history
+    # Ottieni la risposta in streaming
+    response_stream = chat(prompt_setting, history)
+
+    # Aggiungi la risposta parziale alla cronologia
+    for partial_response in response_stream:
+        history.append({"role": "assistant", "content": partial_response})
+        yield history, history  # Aggiorna il chatbot e la cronologia
 
 # invia gli ingredienti selezionati al chatbot
 def invia_ingredienti(history):
-    # Combina gli ingredienti selezionati in una stringa
-    
-    input_text = ", ".join(ingredienti_selezionati)
     # Ottieni la risposta dal chatbot
     response = chat(prompt_setting, history)
     
