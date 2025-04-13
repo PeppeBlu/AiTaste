@@ -72,7 +72,7 @@ def chat(prompt_setting, history):
     Function to send a chat message to the AI model and receive a response.
     """
     messages = [{"role": "system", "content": prompt_setting}] + history
-
+    
     try:
         response = client.chat.completions.create(
             model="deepseek-r1-distill-llama-70b",
@@ -149,7 +149,7 @@ def show_ingredient_input(history):
     return history
 
 # invia il messaggio al modello e riceve la risposta
-def send_message(message, history):
+def send_message(history):
     response = chat(prompt_setting, history)
     history.append({"role": "assistant", "content": response})
     return history, history
@@ -216,13 +216,13 @@ def chatbot_interface():
                     inputs=[history, input_textbox],
                     outputs=[history, chatbot_interface]
                 ).then(
-                    send_message,
-                    inputs=[input_textbox, history],
-                    outputs=[chatbot_interface, history]
-                ).then(
                     fn=svuota_casella,
                     inputs=[],
                     outputs=[input_textbox]
+                ).then(
+                    send_message,
+                    inputs=[history],
+                    outputs=[chatbot_interface, history]
                 )
                 
                 submit_button = gr.Button("Invia Messaggio")
@@ -231,13 +231,13 @@ def chatbot_interface():
                     inputs=[history, input_textbox],
                     outputs=[history, chatbot_interface]
                 ).then(
-                    send_message,
-                    inputs=[input_textbox, history],
-                    outputs=[chatbot_interface, history]
-                ).then(
                     fn=svuota_casella,
                     inputs=[],
                     outputs=[input_textbox]
+                ).then(
+                    send_message,
+                    inputs=[history],
+                    outputs=[chatbot_interface, history]
                 )
                          
             # Colonna destra: Ingredienti
