@@ -1,7 +1,9 @@
+import gradio as gr
+from utils import ingredienti_selezionati, ingredienti_comuni, prompt_setting, client
 
 
 # controlla variabili d'ambiente e chiave API
-def health_check():
+def health_check(prompt_setting, client):
     if prompt_setting is None:
         raise ValueError("La variabile d'ambiente 'PROMPT_SETTING' non è stata trovata nel file config.env.")
     if client is None:
@@ -16,7 +18,7 @@ def health_check():
     return True
 
 # invia input al modello e riceve la risposta
-def chat(prompt_setting, history):
+def chat(prompt_setting, history, client):
     """
     Function to send a chat message to the AI model and receive a response.
     """
@@ -99,7 +101,7 @@ def show_ingredient_input(history):
 
 # invia il messaggio al modello e riceve la risposta
 def send_message(history):
-    response = chat(prompt_setting, history)
+    response = chat(prompt_setting, history, client)
     history.append({"role": "assistant", "content": response})
     return history, history
 
@@ -109,7 +111,7 @@ def invia_ingredienti(history):
     
     input_text = ", ".join(ingredienti_selezionati)
     # Ottieni la risposta dal chatbot
-    response = chat(prompt_setting, history)
+    response = chat(prompt_setting, history, client)
     
     # Aggiorna la cronologia con il messaggio dell'utente e la risposta del chatbot
     history.append({"role": "assistant", "content": response})

@@ -1,3 +1,14 @@
+import os
+from dotenv import load_dotenv
+from groq import Groq
+
+load_dotenv(dotenv_path="config.env")
+
+prompt_setting = os.getenv("PROMPT_SETTING")
+
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
+)
 
 ingredienti_comuni = [
     "Uova",
