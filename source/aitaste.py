@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 import gradio as gr
 from functions import (
     health_check,
-    chat,
     toggle_ingrediente,
     aggiungi_personalizzato,
     rimuovi_personalizzato,
@@ -21,7 +20,6 @@ from functions import (
 
 from utils import (
     ingredienti_comuni,
-    ingredienti_selezionati,
     client,
     prompt_setting
 )  
