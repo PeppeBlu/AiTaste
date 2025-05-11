@@ -186,6 +186,9 @@ def user_login_after_sign_up(username, password):
     if True:
         # Nascondi il login e mostra la chat
         return gr.update(visible=True), gr.update(visible=False), "", username
+    else:
+        # Mostra un messaggio di errore
+        return gr.update(visible=False), gr.update(visible=True), "Errore durante la registrazione", ""
 
 
 # interfaccia del chatbot
