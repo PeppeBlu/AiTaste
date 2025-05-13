@@ -1,8 +1,4 @@
----
-title: AiTaste
-app_file: aitaste.py
-sdk: gradio
-sdk_version: 5.23.3
+
 ---
 # 🍽️ AiTaste – AI Assistant for Gourmet Flavor Pairing
 
@@ -33,7 +29,7 @@ sdk_version: 5.23.3
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/aitaste.git
+   git clone https://github.com/PeppeBlu/aitaste.git
    cd aitaste
 
 
@@ -61,7 +57,7 @@ sdk_version: 5.23.3
 
 Start the app with:
 
-    python aitaste.py
+    python source/aitaste.py
 
 The app will launch locally, and a shareable public link will be available via Gradio.
 
