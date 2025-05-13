@@ -46,11 +46,6 @@
     pip install -r requirements.txt
 
 
-4.	Create a .env file named config.env and add your Groq API key:
-
-    GROQ_API_KEY=your_api_key_here
-
-
 ⸻
 
 **▶️ Run the App**
